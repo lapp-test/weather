@@ -1,0 +1,86 @@
+<div fxLayout="row" class="wrapp" class="weather-root">
+    <mat-card [class.loader]="spinner" class="w-left" fxLayout="column" fxFlex="350px">
+        <div class="search-query-div" fxLayoutAlign="start center">
+            <input [(ngModel)]="cityName" matInput type="text">
+            <span class="c-p" (click)="searchWeather(cityName)" matSuffix><mat-icon>add</mat-icon></span>
+            <!-- <button  mat-button mat-raised-button><mat-icon>add</mat-icon></button> -->
+        </div>
+        <div class="recent-loc" fxLayout="column">
+            <h5>Recent Location</h5>
+            <table>
+                <tbody>
+                    <tr class="c-p" (click)="getSelectedWeather(data)" *ngFor="let data of datas">
+                        <td>
+                            {{data.name + ' ' + getCelcius(data.main.temp) + '°C ' + data.weather[0].main}}
+                        </td>
+                        <!-- <td class="imgg">
+                            <img *ngIf="data?.weather[0]?.main === 'Thunderstorm'" src="../../assets/images/animated/thunder.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Clouds'" src="../../assets/images/animated/cloudy.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Rain'" src="../../assets/images/animated/rainy-1.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Snow'" src="../../assets/images/animated/snowy-1.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Clear'" src="../../assets/images/animated/weather.svg">                
+                        </td> -->
+                        <td>
+                            <mat-icon (click)="refresh(data)" class="c-p">refresh</mat-icon>
+                        </td>
+                        <td>
+                            <mat-icon (click)="delete(data)" class="c-p">clear</mat-icon>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="clearall" fxLayoutAlign="end center">
+                <button (click)="deleteAll()" mat-button mat-raised-button>Clear</button>
+            </div>
+        </div>
+    </mat-card>
+    <mat-card class="w-right" [class.loader]="spinner" fxFlex="600px">
+        <div *ngIf="selectedWeather?.length !== 0" fxLayout="column">
+            <div class="titles">
+                <div fxLayoutAlign="start center">
+                    <h3>{{selectedWeather.name}}</h3>
+                </div>
+                <div fxFlex fxLayoutAlign="end center">
+                    <mat-icon class="c-p" (click)="callfivedays(selectedWeather.name)">refresh</mat-icon>
+                </div>
+            </div>
+            <div fxLayout="row">
+                <div class="as-icon">
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Thunderstorm'" src="../../assets/images/animated/thunder.svg">
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Clouds'" src="../../assets/images/animated/cloudy.svg">
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Rain'" src="../../assets/images/animated/rainy-1.svg">
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Snow'" src="../../assets/images/animated/snowy-1.svg">
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Clear'" src="../../assets/images/animated/weather.svg">        
+                    <img *ngIf="selectedWeather?.weather[0]?.main === 'Mist'" src="../../assets/images/animated/night.svg">        
+                    <!-- <mat-icon >"Thunderstorm"</mat-icon> -->
+                </div>
+                <div fxLayoutAlign="center start" fxLayout="column">
+                    <span>{{getCelcius(selectedWeather?.main?.temp)}} {{'°C'}}</span>
+                    <span>{{selectedWeather?.weather[0]?.description}}</span>
+                    <span>{{'Wind '+ selectedWeather.wind.speed + 'ms ' + selectedWeather.wind.deg + ' deg'}}</span>
+                    <span>{{'Pressure ' + selectedWeather.main.pressure}}</span>
+                </div>
+            </div>
+            <div fxLayout="row" class="last7days" *ngIf="fiveDays?.list?.length">
+                <div [class.hideme]="i > 4" class="roww" fxLayout="column" *ngFor="let data of fiveDays.list; let i = index">
+                    <div class="sets" fxLayout="column" *ngIf="i < 5" fxLayoutAlign="center center">
+                        <span class="date">{{data.dt_txt | date: 'EEEE'}}</span>
+                        <span class="date">{{data.dt_txt | date: 'mediumTime'}}</span>
+                        <span class="icon">
+                            <img *ngIf="data?.weather[0]?.main === 'Thunderstorm'" src="../../assets/images/animated/thunder.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Clouds'" src="../../assets/images/animated/cloudy.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Rain'" src="../../assets/images/animated/rainy-1.svg">
+                            <img *ngIf="data?.weather[0]?.main === 'Snow'" src="../../assets/images/animated/snowy-1.svg">        
+                            <img *ngIf="data?.weather[0]?.main === 'Clear'" src="../../assets/images/animated/weather.svg">        
+                            <img *ngIf="data?.weather[0]?.main === 'Mist'" src="../../assets/images/animated/night.svg">        
+                        </span>
+                        <span class="celc">{{getCelcius(data.main.temp) + '°C'}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="selectedWeather?.length === 0">
+            <span>Weather Preview</span>
+        </div>
+    </mat-card>
+</div>

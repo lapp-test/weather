@@ -19,32 +19,13 @@ export class HomeComponentComponent implements OnInit {
   constructor(
     private authService: AuthService
   ) {
-    // this.getWeatherDatas();
-    // this.weatherDatas$.subscribe(res => {
-    //   this.datas = res;
-    // });
   }
-
-  // get weatherDatas$() {
-  //   return this.weatherDatas.asObservable();
-  // }
-
-  // getWeatherDatas() {
-  //   if (localStorage.getItem('weather-datas')) {
-  //     this.weatherDatas.next(localStorage.getItem('weather-datas'));
-  //   }
-  // }
-
   ngOnInit(): void {
-    // const test = 5 / 9 * (303.15 - 32);
-    // const test = 9 / 5 * (303.15 + 32);
-    // console.log(test);
     if (localStorage.getItem('weather-datas')) {
       this.datas = JSON.stringify(localStorage.getItem('weather-datas'));
     }
   }
   getSelectedWeather(datas) {
-    // console.log(datas);
     this.selectedWeather = datas;
     this.callfivedays(datas.name);
   }
@@ -58,7 +39,6 @@ export class HomeComponentComponent implements OnInit {
     this.authService.getMethod('/forecast', params).subscribe(res => {
       if (res) {
         this.fiveDays = res;
-        // console.log(this.fiveDays);
       }
       this.spinner = false;
     }, error => {
@@ -68,9 +48,8 @@ export class HomeComponentComponent implements OnInit {
   }
   getCelcius(f: number) {
     return Math.round((f - 273.15)).toFixed(2);
-    // return 5 / 9 * (f - 32);
   }
-  searchWeather(val) {
+  async searchWeather(val) {
     if (!val) {
       this.authService.showSnackbar('Please enter city name', 'error');
       return false;
@@ -81,13 +60,19 @@ export class HomeComponentComponent implements OnInit {
         q: this.cityName,
         appid: 'c51223c219d6aec8cb8c5210449bd859'
       };
-      this.authService.getMethod('/weather', params).subscribe(res => {
+      await this.authService.getMethod('/weather', params).subscribe(res => {
         if (res) {
           this.spinner = false;
           if (this.datas.length === 0) {
             this.datas.unshift(res);
           } else {
-            this.checkExists(res);
+            if (this.datas.length > 8) {
+              this.datas.pop();
+            }
+            const isExists = this.checkExists(res);
+            if (!isExists) {
+              this.datas.unshift(res);
+            }
           }
           this.cityName = null;
         }
@@ -104,7 +89,7 @@ export class HomeComponentComponent implements OnInit {
     const newDatas = [];
     await this.datas.map(row => {
       if (row.name !== data.name) {
-        this.datas.unshift(row);
+        newDatas.push(row);
       } else {
         this.selectedWeather = [];
       }
@@ -137,21 +122,21 @@ export class HomeComponentComponent implements OnInit {
       this.spinner = false;
     });
   }
-  async checkExists(data) {
-    await this.datas.map(row => {
-      if (row.name !== data.name) {
-        if (this.datas.length > 8) {
-          this.datas.pop();
-        }
-        this.datas.unshift(data);
-      } else {
+  checkExists(data) {
+    let isExists = false;
+    this.datas.map(row => {
+      if (row.name === data.name) {
+        isExists = true;
         this.authService.showSnackbar('City Already in Lists', 'error');
       }
     });
+    return isExists;
   }
   deleteAll() {
     if (confirm('Are you sure you want to delete all?')) {
       this.datas = [];
+      this.selectedWeather = null;
+      this.fiveDays = [];
     }
   }
 
